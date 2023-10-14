@@ -7,16 +7,35 @@ pub struct Sudoku {
 }
 
 impl Sudoku {
-    pub fn from(arr: [[usize; 9]; 9]) -> Sudoku {
-        Sudoku {
+    pub fn from(arr: [[usize; 9]; 9]) -> Self {
+        Self {
             board: arr,
             possible: [true; 9],
             empty_cells: vec![],
         }
     }
 
+    pub fn from_string(board_str: &str) -> Self {
+        assert_eq!(board_str.len(), 81);
+
+        let mut sudoku_board = [[0usize; 9]; 9];
+
+        for (i, c) in board_str.chars().enumerate() {
+            let row = i / 9;
+            let col = i % 9;
+            let digit = c.to_digit(10).expect("Invalid digit in board_str") as usize;
+            sudoku_board[row][col] = digit;
+        }
+
+        Self {
+            board: sudoku_board,
+            possible: [true; 9],
+            empty_cells: vec![],
+        }
+    }
+
     pub fn solve(&mut self) -> bool {
-        self.find_empty_cells();
+        self.get_empty_cells();
         if self.empty_cells.is_empty() {
             return true;
         }
@@ -35,7 +54,7 @@ impl Sudoku {
         false
     }
 
-    fn find_empty_cells(&mut self) {
+    fn get_empty_cells(&mut self) {
         self.empty_cells.clear();
         for y in 0..9 {
             for x in 0..9 {
