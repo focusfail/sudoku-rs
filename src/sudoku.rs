@@ -7,6 +7,7 @@ pub struct Sudoku {
 }
 
 impl Sudoku {
+    // Creates Sudoku instance from a 2d array
     pub fn from(arr: [[usize; 9]; 9]) -> Self {
         Self {
             board: arr,
@@ -15,6 +16,7 @@ impl Sudoku {
         }
     }
 
+    // Creates Sudoku instance from 81 character long string
     pub fn from_string(board_str: &str) -> Self {
         assert_eq!(board_str.len(), 81);
 
@@ -34,44 +36,62 @@ impl Sudoku {
         }
     }
 
+    // Solves the Sudoku puzzle, returns true if solved
     pub fn solve(&mut self) -> bool {
+        // Identify and store empty cells
         self.get_empty_cells();
+
+        // If there are no empty cells, the puzzle is solved
         if self.empty_cells.is_empty() {
             return true;
         }
 
+        // Pick the first empty cell with the least possiblitie
         let smallest = &self.empty_cells[0];
         let (x, y, possibles) = smallest.to_owned();
 
+        // Try each possible value for the cell
         for num in possibles {
             self.board[y][x] = num;
 
+            // Recursively attempt to solve with the current value
             if self.solve() {
-                return true;
+                return true; // If successful, return true
             }
+
+            // If current value doesn't lead to a solution, backtrack
             self.board[y][x] = 0;
         }
+        // Return false for failed path
         false
     }
 
+    // Identify and store empty cells along with their possible values
     fn get_empty_cells(&mut self) {
         self.empty_cells.clear();
+
+        // Iterate all cells
         for y in 0..9 {
             for x in 0..9 {
                 if self.board[y][x] == 0 {
+                    // Get all possible values for a cell
                     let possibles = self.possible_values(x, y);
+
+                    // Add empty cell and possible values
                     self.empty_cells.push((x, y, possibles));
                 }
             }
         }
 
+        // For optimization, sort empty cells by amount of possible values
         self.empty_cells
             .sort_by_key(|&(_, _, ref possibles)| possibles.len());
     }
 
+    // Identify possible values for a given cell
     fn possible_values(&mut self, x: usize, y: usize) -> Vec<usize> {
         if self.board[y][x] != 0 {
-            return vec![];
+            return vec![]; // Cell is already filled
         }
         self.possible = [true; 9];
 
@@ -82,23 +102,33 @@ impl Sudoku {
             let i = ind / 3;
             let j = ind % 3;
 
+            // ind'th cell in according sudoku block of the cell
             let block_cell = self.board[start + i][end + j];
-            let col_cell = self.board[ind][x];
-            let row = self.board[y][ind];
 
-            if block_cell != 0 {
+            // ind'th cell in the according column of the cell
+            let col_cell = self.board[ind][x];
+
+            // ind'th cell in the according row of the cell
+            let row_cell = self.board[y][ind];
+
+            // Update possible values based on the existing numbers in the block, row, and column
+            // If a number occurs in the 'block_cell', 'col_cell' or 'row_cell'
+            // it is not a possible value
+            if block_cell > 0 && self.possible[block_cell - 1] {
                 self.possible[block_cell - 1] = false;
             }
 
-            if col_cell != 0 {
+            if col_cell > 0 && self.possible[col_cell - 1] {
                 self.possible[col_cell - 1] = false;
             }
 
-            if row != 0 {
-                self.possible[row - 1] = false;
+            if row_cell > 0 && self.possible[row_cell - 1] {
+                self.possible[row_cell - 1] = false;
             }
         }
 
+        // Convert array of booleans to vec of possible.
+        // INFO: I dont remember why I took the bool-array approach in the first place 👍
         self.possible
             .iter()
             .enumerate()
@@ -106,16 +136,18 @@ impl Sudoku {
             .collect()
     }
 
+    // Check if the Sudoku puzzle is completely filled
     pub fn is_filled(&self) -> bool {
         for i in 0..9 {
             if self.board[i].contains(&0usize) {
-                return false;
+                return false; // If any row contains an empty cell, puzzle is not filled
             }
         }
         true
     }
 }
 
+// Implement Display trait for pretty printing Sudoku
 impl fmt::Display for Sudoku {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut sudoku_board = String::new();
