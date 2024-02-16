@@ -16,8 +16,12 @@ pub fn sudoku_solver_benchmark() {
         contents = line.expect("unable to read line");
         let mut sudoku = Sudoku::from_string(&contents);
         let start = Instant::now();
+        
 
-        sudoku.solve();
+        match sudoku.solve() {
+            Ok(()) => (),
+            Err(()) => println!("Error solving board {} \n\n{}", completed, sudoku)
+        };
         // println!("{}", sudoku);
 
         let elapsed = start.elapsed();

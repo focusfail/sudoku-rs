@@ -35,9 +35,18 @@ impl Sudoku {
             empty_cells: vec![],
         }
     }
+    
+    pub fn solve(&mut self) -> Result<(), ()> {
+        self.solve_recursive();
+
+        if self.is_filled() {
+            return Ok(());
+        }
+        Err(())
+    }
 
     // Solves the Sudoku puzzle, returns true if solved
-    pub fn solve(&mut self) -> bool {
+    fn solve_recursive(&mut self) -> bool {
         // Identify and store empty cells
         self.get_empty_cells();
 
@@ -55,7 +64,7 @@ impl Sudoku {
             self.board[y][x] = num;
 
             // Recursively attempt to solve with the current value
-            if self.solve() {
+            if self.solve_recursive() {
                 return true; // If successful, return true
             }
 

@@ -17,9 +17,11 @@ fn main() {
     let mut sudoku = Sudoku::from_string(puzzle);
     
     // Attempt to solve the sudoku
-    sudoku.solve();
+    match sudoku.solve() {
+        Ok(()) => println!("\nThis is the solved Sudoku-board:\n\n{}", sudoku),
+        Err(()) => println!("Unable to solve board"),
+    };
 
-    println!("\nThis is the solved Sudoku-board:\n\n{}", sudoku);
 }
 
 ```
